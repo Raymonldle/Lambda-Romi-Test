@@ -4,11 +4,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.PS4Controller;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.RomiDrivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -22,7 +23,8 @@ public class RobotContainer {
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_romiDrivetrain);
 
-  private final XboxController m_Controller = new XboxController(0);
+  private final CommandXboxController m_Controller = new CommandXboxController(0);
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -38,8 +40,12 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     m_romiDrivetrain.setDefaultCommand(new RunCommand(
-      () -> { m_romiDrivetrain.arcadeDrive(m_Controller.getLeftY(), m_Controller.getRightX()); },
+      () -> { m_romiDrivetrain.arcadeDrive(m_Controller.getLeftY()*0.35, m_Controller.getRightX()*0.35); },
       m_romiDrivetrain));
+
+    m_Controller.x().onTrue(getArcadeDriveCommand(0, 0.5));
+    m_Controller.b().onTrue(new RunCommand(() -> { m_romiDrivetrain.arcadeDrive(0, -0.5);}, m_romiDrivetrain));
+     m_Controller.y().onTrue(new Command(() -> { m_romiDrivetrain.arcadeDrive(0, -0.5);}, m_romiDrivetrain));
   }
 
   /**
@@ -49,6 +55,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new RunCommand(() ->{ m_romiDrivetrain.arcadeDrive(0.5, 0); } , m_romiDrivetrain);
+    return new RunCommand(() ->{ m_romiDrivetrain.arcadeDrive(0.25, 0); } , m_romiDrivetrain);
+  }
+
+  private Command getArcadeDriveCommand(double xSpeed, double zRotate) {
+    return new RunCommand(() -> m_romiDrivetrain.arcadeDrive(xSpeed, zRotate), m_romiDrivetrain);
   }
 }
